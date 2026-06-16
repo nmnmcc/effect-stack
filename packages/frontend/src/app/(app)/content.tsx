@@ -62,7 +62,7 @@ export function TodosContent() {
         </form>
       )}
 
-      {AsyncResult.isLoading(result) && (
+      {AsyncResult.isInitial(result) && (
         <div className="flex justify-center py-8">
           <Loader2Icon className="text-muted-foreground size-6 animate-spin" />
         </div>

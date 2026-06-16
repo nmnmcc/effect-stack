@@ -1,13 +1,13 @@
 import { Schema } from "effect";
-import { HttpApiEndpoint, HttpApiGroup, HttpApiSchema } from "effect/unstable/httpapi";
+import { HttpApiEndpoint, HttpApiError, HttpApiGroup, HttpApiSchema } from "effect/unstable/httpapi";
 
 import { AuthMiddleware } from "./middlewares/auth";
 
 export class Todo extends Schema.Class<Todo>("Todo")({
-  id: Schema.UUID,
+  id: Schema.String,
   title: Schema.String,
   isCompleted: Schema.Boolean,
-  userId: Schema.UUID,
+  userId: Schema.String,
   createdAt: Schema.DateFromString,
   updatedAt: Schema.DateFromString,
 }) {}
@@ -23,51 +23,46 @@ export class TodoForbidden extends Schema.TaggedErrorClass<TodoForbidden>()(
 export class TodosGroup extends HttpApiGroup.make("todos")
   .add(
     HttpApiEndpoint.get("list", "/", {
+      query: {
+        limit: Schema.optional(Schema.NumberFromString),
+        offset: Schema.optional(Schema.NumberFromString),
+      },
       success: Schema.Array(Todo),
-    }).setQuery(
-      Schema.Struct({
-        limit: Schema.optionalWith(Schema.NumberFromString, { default: () => 25 }),
-        offset: Schema.optionalWith(Schema.NumberFromString, { default: () => 0 }),
-      }),
-    ),
+      error: HttpApiError.InternalServerError,
+    }),
   )
   .add(
     HttpApiEndpoint.get("getById", "/:id", {
+      params: { id: Schema.String },
       success: Todo,
-      errors: [TodoNotFound],
-    }).setParams(Schema.Struct({ id: Schema.UUID })),
+      error: [TodoNotFound, HttpApiError.InternalServerError],
+    }),
   )
   .add(
     HttpApiEndpoint.post("create", "/", {
+      payload: Schema.Struct({
+        title: Schema.String,
+      }),
       success: Todo,
-    })
-      .setPayload(
-        Schema.Struct({
-          title: Schema.String,
-        }),
-      )
-      .middleware(AuthMiddleware),
+      error: HttpApiError.InternalServerError,
+    }).middleware(AuthMiddleware),
   )
   .add(
     HttpApiEndpoint.patch("update", "/:id", {
+      params: { id: Schema.String },
+      payload: Schema.Struct({
+        title: Schema.optional(Schema.String),
+        isCompleted: Schema.optional(Schema.Boolean),
+      }),
       success: Todo,
-      errors: [TodoNotFound, TodoForbidden],
-    })
-      .setParams(Schema.Struct({ id: Schema.UUID }))
-      .setPayload(
-        Schema.Struct({
-          title: Schema.optionalWith(Schema.String, { as: "Option" }),
-          isCompleted: Schema.optionalWith(Schema.Boolean, { as: "Option" }),
-        }),
-      )
-      .middleware(AuthMiddleware),
+      error: [TodoNotFound, TodoForbidden, HttpApiError.InternalServerError],
+    }).middleware(AuthMiddleware),
   )
   .add(
-    HttpApiEndpoint.del("delete", "/:id", {
+    HttpApiEndpoint.delete("delete", "/:id", {
+      params: { id: Schema.String },
       success: HttpApiSchema.NoContent,
-      errors: [TodoNotFound, TodoForbidden],
-    })
-      .setParams(Schema.Struct({ id: Schema.UUID }))
-      .middleware(AuthMiddleware),
+      error: [TodoNotFound, TodoForbidden, HttpApiError.InternalServerError],
+    }).middleware(AuthMiddleware),
   )
   .prefix("/todos") {}

@@ -1,9 +1,11 @@
-import { Effect, Option } from "effect";
+import { eq } from "drizzle-orm";
+import { Effect } from "effect";
 import { HttpApiBuilder, HttpApiError } from "effect/unstable/httpapi";
 
 import { Database } from "../../database";
 import { todos } from "../../database/schema/todo";
-import { CurrentUser, TodoForbidden, TodoNotFound } from "../interfaces";
+import { CurrentUser } from "../interfaces/middlewares/auth";
+import { TodoForbidden, TodoNotFound } from "../interfaces/todos";
 import { Api } from "../interfaces";
 
 export const TodosHandlers = HttpApiBuilder.group(
@@ -16,8 +18,8 @@ export const TodosHandlers = HttpApiBuilder.group(
       .handle("list", ({ query }) =>
         Effect.gen(function* () {
           const rows = yield* database.query.todos.findMany({
-            limit: query.limit,
-            offset: query.offset,
+            limit: query.limit ?? 25,
+            offset: query.offset ?? 0,
             orderBy: (table, { desc }) => [desc(table.createdAt)],
           });
           return rows;
@@ -35,10 +37,13 @@ export const TodosHandlers = HttpApiBuilder.group(
       .handle("create", ({ payload }) =>
         Effect.gen(function* () {
           const user = yield* CurrentUser;
-          const [row] = yield* database.insert(todos).values({
-            title: payload.title,
-            userId: user.id,
-          }).returning();
+          const [row] = yield* database
+            .insert(todos)
+            .values({
+              title: payload.title,
+              userId: user.id,
+            })
+            .returning();
           return row!;
         }).pipe(Effect.catchTag("EffectDrizzleQueryError", () => Effect.fail(new HttpApiError.InternalServerError()))),
       )
@@ -52,14 +57,10 @@ export const TodosHandlers = HttpApiBuilder.group(
           if (existing.userId !== user.id) return yield* new TodoForbidden();
 
           const updates: Record<string, unknown> = {};
-          if (Option.isSome(payload.title)) updates["title"] = payload.title.value;
-          if (Option.isSome(payload.isCompleted)) updates["isCompleted"] = payload.isCompleted.value;
+          if (payload.title !== undefined) updates["title"] = payload.title;
+          if (payload.isCompleted !== undefined) updates["isCompleted"] = payload.isCompleted;
 
-          const [row] = yield* database
-            .update(todos)
-            .set(updates)
-            .where(({ id }, { eq }) => eq(id, params.id))
-            .returning();
+          const [row] = yield* database.update(todos).set(updates).where(eq(todos.id, params.id)).returning();
           return row!;
         }).pipe(
           Effect.catchTag("EffectDrizzleQueryError", () => Effect.fail(new HttpApiError.InternalServerError())),
@@ -74,7 +75,7 @@ export const TodosHandlers = HttpApiBuilder.group(
           if (existing === undefined) return yield* new TodoNotFound();
           if (existing.userId !== user.id) return yield* new TodoForbidden();
 
-          yield* database.delete(todos).where(({ id }, { eq }) => eq(id, params.id));
+          yield* database.delete(todos).where(eq(todos.id, params.id));
         }).pipe(
           Effect.catchTag("EffectDrizzleQueryError", () => Effect.fail(new HttpApiError.InternalServerError())),
         ),
