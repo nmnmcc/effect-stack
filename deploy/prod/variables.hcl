@@ -1,3 +1,9 @@
+variable "network" {
+  description = "Docker network name"
+  type        = string
+  default     = "effect-stack"
+}
+
 variable "image_backend" {
   description = "Backend Docker image"
   type        = string

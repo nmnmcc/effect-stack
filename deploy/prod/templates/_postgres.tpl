@@ -1,16 +1,30 @@
   group "postgres" {
     network {
-      mode = "bridge"
       port "db" { static = 5432 }
+    }
+
+    service {
+      name     = "postgres"
+      port     = "db"
+      provider = "nomad"
+
+      check {
+        type     = "tcp"
+        port     = "db"
+        interval = "10s"
+        timeout  = "2s"
+      }
     }
 
     task "postgres" {
       driver = "docker"
       config {
-        image        = "postgres:17"
-        ports        = ["db"]
-        volumes      = ["effect-stack-postgres:/var/lib/postgresql/data"]
-        args         = [
+        image           = "postgres:17"
+        network_mode    = "[[ var "network" . ]]"
+        network_aliases = ["postgres"]
+        ports           = ["db"]
+        volumes         = ["effect-stack-postgres:/var/lib/postgresql/data"]
+        args            = [
           "-c", "max_connections=200",
           "-c", "shared_buffers=256MB",
           "-c", "effective_cache_size=768MB",
@@ -28,15 +42,6 @@
       resources {
         cpu    = 500
         memory = 1024
-      }
-
-      service {
-        port = "db"
-        check {
-          type     = "tcp"
-          interval = "10s"
-          timeout  = "2s"
-        }
       }
     }
   }

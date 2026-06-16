@@ -9,12 +9,11 @@ export const AuthRoutes = HttpRouter.use((router) =>
     yield* router.add(
       "*",
       "/api/auth/*",
-      Effect.gen(function* () {
-        const request = yield* HttpServerRequest.HttpServerRequest;
-        const webRequest = yield* HttpServerRequest.toWeb(request);
-        const webResponse = yield* Effect.promise(() => auth.handler(webRequest));
-        return HttpServerResponse.fromWeb(webResponse);
-      }),
+      HttpServerRequest.HttpServerRequest.pipe(
+        Effect.flatMap(HttpServerRequest.toWeb),
+        Effect.flatMap((request) => Effect.promise(() => auth.handler(request))),
+        Effect.map(HttpServerResponse.fromWeb),
+      ),
     );
   }),
 );
