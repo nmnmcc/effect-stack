@@ -12,13 +12,9 @@ export class Todo extends Schema.Class<Todo>("Todo")({
   updatedAt: Schema.DateFromString,
 }) {}
 
-export class TodoNotFound extends Schema.TaggedErrorClass<TodoNotFound>()("TodoNotFound", {}, { httpApiStatus: 404 }) {}
+export class TodoNotFound extends Schema.TaggedError<TodoNotFound>()("TodoNotFound", {}, { httpApiStatus: 404 }) {}
 
-export class TodoForbidden extends Schema.TaggedErrorClass<TodoForbidden>()(
-  "TodoForbidden",
-  {},
-  { httpApiStatus: 403 },
-) {}
+export class TodoForbidden extends Schema.TaggedError<TodoForbidden>()("TodoForbidden", {}, { httpApiStatus: 403 }) {}
 
 export class TodosGroup extends HttpApiGroup.make("todos")
   .add(

@@ -27,7 +27,7 @@ export class CurrentSession extends Context.Service<CurrentSession, Session>()("
 
 export class CurrentUser extends Context.Service<CurrentUser, User>()("@effect-stack/api/CurrentUser") {}
 
-export class Unauthorized extends Schema.TaggedErrorClass<Unauthorized>()("Unauthorized", {}, { httpApiStatus: 401 }) {}
+export class Unauthorized extends Schema.TaggedError<Unauthorized>()("Unauthorized", {}, { httpApiStatus: 401 }) {}
 
 export class AuthMiddleware extends HttpApiMiddleware.Service<
   AuthMiddleware,

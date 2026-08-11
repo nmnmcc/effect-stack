@@ -54,8 +54,8 @@ export namespace DatabasePool {
       }).pipe(
         Effect.retry(
           Schedule.exponential("1 second").pipe(
-            Schedule.modifyDelay((_, delay) => Effect.succeed(Duration.min(delay, Duration.seconds(10)))),
-            Schedule.take(10),
+            Schedule.modifyDelay(({ duration }) => Effect.succeed(Duration.min(duration, Duration.seconds(10)))),
+            Schedule.upTo({ times: 10 }),
           ),
         ),
         Effect.tap(() => Effect.log("Database: connected to PostgreSQL")),

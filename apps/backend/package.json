@@ -4,11 +4,11 @@
   "dependencies": {
     "@better-auth/expo": "1.6.23",
     "@effect-stack/api": "workspace:*",
-    "@effect/platform-node": "4.0.0-beta.92",
-    "@effect/sql-pg": "4.0.0-beta.93",
+    "@effect/platform-node": "4.0.0-beta.107",
+    "@effect/sql-pg": "4.0.0-beta.107",
     "better-auth": "^1.6.23",
-    "drizzle-orm": "1.0.0-rc.4",
-    "effect": "4.0.0-beta.93",
+    "drizzle-orm": "patch:drizzle-orm@npm%3A1.0.0-rc.4#~/.yarn/patches/drizzle-orm-npm-1.0.0-rc.4-bf6374556a.patch",
+    "effect": "4.0.0-beta.107",
     "ioredis": "^5.11.1",
     "pg": "^8.22.0",
     "uuid": "^14.0.1"
