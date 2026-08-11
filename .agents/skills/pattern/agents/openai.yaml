@@ -1,4 +1,0 @@
-interface:
-  display_name: "Pattern"
-  short_description: "Gate product source code with runnable project patterns."
-  default_prompt: "Use $pattern to check project pattern coverage before changing product source code, create a qualified pattern when needed, and follow every applicable active pattern."

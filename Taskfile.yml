@@ -2,11 +2,11 @@ version: "3"
 
 includes:
   frontend:
-    taskfile: "./packages/frontend/Taskfile.yml"
-    dir: "./packages/frontend"
+    taskfile: "./apps/frontend/Taskfile.yml"
+    dir: "./apps/frontend"
   backend:
-    taskfile: "./packages/backend/Taskfile.yml"
-    dir: "./packages/backend"
+    taskfile: "./apps/backend/Taskfile.yml"
+    dir: "./apps/backend"
 
 tasks:
   default:
@@ -68,16 +68,21 @@ tasks:
       - until nomad agent-info > /dev/null 2>&1; do sleep 1; done
 
   build:
-    desc: Build all packages
+    desc: Build all apps
     deps:
       - frontend:build
+      - backend:build
+
+  test:
+    desc: Test all packages
+    cmd: yarn workspace @effect-stack/api test
 
   typecheck:
-    desc: Type check all packages
+    desc: Type check all workspaces
     cmd: yarn tsc -b --noEmit
 
   lint:
-    desc: Lint all packages
+    desc: Lint both apps
     deps:
       - frontend:lint
       - backend:lint

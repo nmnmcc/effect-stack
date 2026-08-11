@@ -1,7 +1,7 @@
 import { HttpApi, OpenApi } from "effect/unstable/httpapi";
 
-import { HealthGroup } from "./health";
-import { TodosGroup } from "./todos";
+import { HealthGroup } from "./groups/health";
+import { TodosGroup } from "./groups/todos";
 
 export class Api extends HttpApi.make("api")
   .add(HealthGroup)
@@ -13,7 +13,3 @@ export class Api extends HttpApi.make("api")
       version: "0.1.0",
     }),
   ) {}
-
-export * from "./health";
-export * from "./todos";
-export * from "./middlewares/auth";

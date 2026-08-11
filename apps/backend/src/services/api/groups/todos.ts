@@ -1,12 +1,10 @@
+import { Api, CurrentUser, TodoForbidden, TodoNotFound } from "@effect-stack/api";
 import { eq } from "drizzle-orm";
 import { Effect } from "effect";
 import { HttpApiBuilder, HttpApiError } from "effect/unstable/httpapi";
 
 import { Database } from "../../database";
 import { todos } from "../../database/schema/todo";
-import { CurrentUser } from "../interfaces/middlewares/auth";
-import { TodoForbidden, TodoNotFound } from "../interfaces/todos";
-import { Api } from "../interfaces";
 
 export const TodosHandlers = HttpApiBuilder.group(
   Api,
@@ -62,9 +60,7 @@ export const TodosHandlers = HttpApiBuilder.group(
 
           const [row] = yield* database.update(todos).set(updates).where(eq(todos.id, params.id)).returning();
           return row!;
-        }).pipe(
-          Effect.catchTag("EffectDrizzleQueryError", () => Effect.fail(new HttpApiError.InternalServerError())),
-        ),
+        }).pipe(Effect.catchTag("EffectDrizzleQueryError", () => Effect.fail(new HttpApiError.InternalServerError()))),
       )
       .handle("delete", ({ params }) =>
         Effect.gen(function* () {
@@ -76,9 +72,7 @@ export const TodosHandlers = HttpApiBuilder.group(
           if (existing.userId !== user.id) return yield* new TodoForbidden();
 
           yield* database.delete(todos).where(eq(todos.id, params.id));
-        }).pipe(
-          Effect.catchTag("EffectDrizzleQueryError", () => Effect.fail(new HttpApiError.InternalServerError())),
-        ),
+        }).pipe(Effect.catchTag("EffectDrizzleQueryError", () => Effect.fail(new HttpApiError.InternalServerError()))),
       );
   }),
 );

@@ -19,34 +19,18 @@ An opinionated full-stack TypeScript template built on Effect, Next.js, Drizzle 
 
 ```
 effect-stack/
+├── apps/
+│   ├── backend/          # Effect API server, handlers, auth, and database
+│   └── frontend/         # Next.js/vinext web application
 ├── packages/
-│   ├── backend/          # Effect-based API server
-│   │   ├── src/
-│   │   │   ├── Config/       # Typed configuration (Effect Config)
-│   │   │   ├── Database/     # Drizzle schema, migrations, database layer
-│   │   │   ├── Auth/         # better-auth integration as Effect service
-│   │   │   ├── Api/          # API modules with interfaces/implementations
-│   │   │   │   ├── Users/
-│   │   │   │   │   ├── Api.ts           # Interface (Effect Context tag)
-│   │   │   │   │   ├── ApiLive.ts       # Implementation (Effect Layer)
-│   │   │   │   │   └── index.ts
-│   │   │   │   └── ...
-│   │   │   └── Main.ts       # Entry point, layer composition
-│   │   ├── drizzle/          # Generated migrations
-│   │   ├── Taskfile.yml
-│   │   ├── tsconfig.json
-│   │   └── package.json
-│   └── frontend/         # Next.js application
+│   └── api/              # Shared HttpApi contracts and generated OpenAPI document
 │       ├── src/
-│       │   ├── app/          # Next.js App Router pages and layouts
-│       │   ├── atoms/        # Jotai atoms for client state
-│       │   ├── lib/          # Shared utilities, API client, auth helpers
-│       │   └── components/   # UI components (Ark UI + shadcn)
-│       ├── Taskfile.yml
-│       ├── tsconfig.json
-│       └── package.json
-├── deploy/               # Nomad job specs and deployment config
-├── package.json          # Yarn workspaces root
+│       │   ├── groups/       # Endpoint groups and request/response schemas
+│       │   ├── middlewares/  # Middleware contracts shared with handlers
+│       │   ├── api.ts        # Complete Effect HttpApi definition
+│       │   └── openapi.ts    # OpenAPI document derived from the HttpApi
+│       └── test/              # Public contract and OpenAPI checks
+├── package.json          # Yarn workspace root for apps/* and packages/*
 ├── tsconfig.base.json    # Shared TypeScript configuration
 ├── tsconfig.json         # Project references
 ├── Taskfile.yml          # Root task runner
@@ -100,10 +84,11 @@ effect-stack/
    task dev:logs -- backend   # Follow logs for a specific service
    task dev:stop      # Stop all services
    task dev:reset     # Destroy data and restart fresh
-   task typecheck     # Type check all packages
-   task lint          # Lint all packages
+   task typecheck     # Type check all workspaces
+   task test          # Test shared packages
+   task lint          # Lint both apps
    task format        # Format code with Prettier
-   task build         # Build all packages
+   task build         # Build both apps
    ```
 
 ## Architecture
@@ -118,12 +103,27 @@ The backend follows the Effect services pattern for dependency injection and str
 
 This pattern gives you compile-time checked dependency injection, testability through layer substitution, and explicit error channels in every operation's type signature.
 
+### Shared API Contract
+
+`@effect-stack/api` is the environment-independent source of truth for endpoint names, paths, schemas, typed failures, and middleware requirements. The backend uses it to type its `HttpApiBuilder` handlers, while the frontend uses the same runtime `HttpApi` value to construct its typed client.
+
+The package also exports an OpenAPI 3.1 document generated directly from that contract:
+
+```ts
+import { Api } from "@effect-stack/api";
+import { openApiDocument } from "@effect-stack/api/openapi";
+```
+
+When the backend is running, it serves the same contract at `/api/openapi.json` and its Scalar UI at `/api/docs`.
+
+Keep server layers, database access, environment configuration, and authentication-provider adapters in `apps/backend`; putting them in the contract package would make browser and tooling consumers depend on server implementation details.
+
 ### Backend Structure
 
-- `Config/` -- Application configuration loaded via Effect's Config module with typed schemas and environment variable mapping.
-- `Database/` -- Drizzle ORM schema definitions, migration runner, and a database service layer that manages the connection pool.
-- `Auth/` -- Authentication service wrapping better-auth, exposed as an Effect service with session management and middleware.
-- `Api/` -- Feature modules each following the interface/implementation split. Each module exports its tag, layer, and any request/response schemas.
+- `src/services/config/` -- Application configuration loaded through Effect Config.
+- `src/services/database/` -- Drizzle schemas, migrations, and the managed database layer.
+- `src/services/auth/` -- better-auth integration exposed as an Effect service.
+- `src/services/api/groups/` -- Handler layers corresponding 1:1 with the groups exported by `@effect-stack/api`.
 
 ### Frontend Structure
 

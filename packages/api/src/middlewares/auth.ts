@@ -23,9 +23,7 @@ export interface User {
   readonly updatedAt: Date;
 }
 
-export class CurrentSession extends Context.Service<CurrentSession, Session>()(
-  "@effect-stack/api/CurrentSession",
-) {}
+export class CurrentSession extends Context.Service<CurrentSession, Session>()("@effect-stack/api/CurrentSession") {}
 
 export class CurrentUser extends Context.Service<CurrentUser, User>()("@effect-stack/api/CurrentUser") {}
 

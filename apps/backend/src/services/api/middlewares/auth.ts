@@ -1,8 +1,3 @@
-import { Effect, Layer, Option } from "effect";
-import { isNotNullish } from "effect/Predicate";
-import { HttpServerRequest } from "effect/unstable/http";
-
-import { Auth } from "../../../auth";
 import {
   AuthMiddleware,
   CurrentSession,
@@ -10,7 +5,12 @@ import {
   CurrentUserOption,
   OptionalAuthMiddleware,
   Unauthorized,
-} from "../../interfaces/middlewares/auth";
+} from "@effect-stack/api";
+import { Effect, Layer, Option } from "effect";
+import { isNotNullish } from "effect/Predicate";
+import { HttpServerRequest } from "effect/unstable/http";
+
+import { Auth } from "../../auth";
 
 export const AuthMiddlewareLive = Layer.effect(
   AuthMiddleware,

@@ -15,6 +15,7 @@ devenv.local.yaml
 .direnv
 .pre-commit-config.yaml
 .next
+dist
 *.tsbuildinfo
 /.dev
 .playwright*

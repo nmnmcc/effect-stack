@@ -1,4 +1,4 @@
-import { Api } from "@effect-stack/backend/api";
+import { Api } from "@effect-stack/api";
 import { Layer } from "effect";
 import { FetchHttpClient } from "effect/unstable/http";
 import { AtomHttpApi } from "effect/unstable/reactivity";

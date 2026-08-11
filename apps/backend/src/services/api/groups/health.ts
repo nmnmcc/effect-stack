@@ -1,7 +1,6 @@
+import { Api } from "@effect-stack/api";
 import { Effect } from "effect";
 import { HttpApiBuilder } from "effect/unstable/httpapi";
-
-import { Api } from "../interfaces";
 
 export const HealthHandlers = HttpApiBuilder.group(
   Api,

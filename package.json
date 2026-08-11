@@ -4,6 +4,7 @@
   "type": "module",
   "packageManager": "yarn@4.13.0",
   "workspaces": [
+    "./apps/*",
     "./packages/*"
   ],
   "devDependencies": {

@@ -14,15 +14,21 @@
 - **Boolean variables** must use `is`/`has`/`should`/`can` prefixes or adjective/past-participle forms.
 - **Prefer `export * from "..."`** in barrel files over listing individual exports.
 
-## Backend (`packages/backend/`)
+## API (`packages/api/`)
+
+- Keep the package environment-independent: only declarative `HttpApi` contracts, schemas, middleware tags, and OpenAPI generation belong here.
+- Export the Effect `HttpApi` from the package root and generate the exported OpenAPI document from that same value.
+- API group contracts live in `src/groups/`; backend handlers must have 1:1 correspondence.
+
+## Backend (`apps/backend/`)
 
 - All constants go in the **Config service** (`services/config/index.ts`).
 - **No `Effect.die` / `Effect.orDie`** — map unrecoverable errors to `HttpApiError.InternalServerError`.
 - **Error mapping must use individual `Effect.catchTag`** calls — no batch `Effect.mapError`.
 - **No `let`** — all bindings are `const`.
-- API groups live in `interfaces/` (contract) and `implementations/` (handlers) with 1:1 correspondence.
+- API group handlers live in `services/api/groups/`; contracts come from `@effect-stack/api`.
 
-## Frontend (`packages/frontend/`)
+## Frontend (`apps/frontend/`)
 
 - `components/ui/` are **generated files** from `@shark` registry — do not edit manually.
 - Prefer **server components**; only use `"use client"` when browser APIs or state are needed.

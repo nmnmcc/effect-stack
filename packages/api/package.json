@@ -1,0 +1,19 @@
+{
+  "name": "@effect-stack/api",
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./openapi": "./src/openapi.ts"
+  },
+  "scripts": {
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "effect": "4.0.0-beta.93"
+  },
+  "devDependencies": {
+    "@effect/vitest": "4.0.0-beta.93",
+    "@types/node": "^26.1.0",
+    "vitest": "^4.1.10"
+  }
+}

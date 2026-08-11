@@ -4,3 +4,5 @@ node_modules
 .devenv*
 .direnv
 .next
+dist
+next-env.d.ts
