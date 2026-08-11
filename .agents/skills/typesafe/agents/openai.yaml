@@ -1,0 +1,4 @@
+interface:
+  display_name: "TypeSafe"
+  short_description: "Keep type guarantees honest from source to use."
+  default_prompt: "Use $typesafe to keep meaning, runtime values, types or contracts, data forms, proof, and allowed operations in agreement from source to final use."

@@ -1,0 +1,4 @@
+interface:
+  display_name: "Docs"
+  short_description: "Keep software docs and comments in step with code."
+  default_prompt: "Use $docs to keep software documentation and comments in step with the code and contracts they explain, and verify both against the real system."

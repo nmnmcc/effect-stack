@@ -1,11 +1,89 @@
 {
   "version": 1,
   "skills": {
+    "docs": {
+      "source": "nmnmcc/skills",
+      "sourceType": "github",
+      "skillPath": "skills/docs/SKILL.md",
+      "computedHash": "40fca6402784ff209f9652493f0903bb1c22b57abfd8ffb58d009bcd9e9dcba4"
+    },
+    "dx": {
+      "source": "nmnmcc/skills",
+      "sourceType": "github",
+      "skillPath": "skills/dx/SKILL.md",
+      "computedHash": "0de065a0233e9a4e28f696ffd25ee8f9788abe4b62a5383fb153aa1b29dff153"
+    },
+    "effect": {
+      "source": "nmnmcc/skills",
+      "sourceType": "github",
+      "skillPath": "skills/effect/SKILL.md",
+      "computedHash": "a743a0a50a6f27385b2940a2208f380fdbf2291079f1ffb023fb186f9e0f7441"
+    },
+    "just-do-it": {
+      "source": "nmnmcc/skills",
+      "sourceType": "github",
+      "skillPath": "skills/just-do-it/SKILL.md",
+      "computedHash": "fd048f76a7d61388cf2b39bd598112426ef16f3b7dcb3b4aaa7a19d3a42cbfd7"
+    },
+    "line": {
+      "source": "nmnmcc/skills",
+      "sourceType": "github",
+      "skillPath": "skills/line/SKILL.md",
+      "computedHash": "32188eec8d9c45c608d80df1c25a0238ee0e5c81dccbf84ddc7b914b4fbe6aa2"
+    },
     "migrate-to-vinext": {
       "source": "cloudflare/vinext",
       "sourceType": "github",
       "skillPath": ".agents/skills/migrate-to-vinext/SKILL.md",
       "computedHash": "e45fee21a0bd2f86d5b29291115b82a5e16bafd6a5f13371a9937e0ddae64388"
+    },
+    "pattern": {
+      "source": "nmnmcc/skills",
+      "sourceType": "github",
+      "skillPath": "skills/pattern/SKILL.md",
+      "computedHash": "62fc0cb154fef91aaa50973cfb400e7b7282944c57432a7c49e56208a4761f96"
+    },
+    "plane": {
+      "source": "nmnmcc/skills",
+      "sourceType": "github",
+      "skillPath": "skills/plane/SKILL.md",
+      "computedHash": "792292e41364b09becf1fcbb12c48babf4410f014a05199d85728f4822a6c0fe"
+    },
+    "point": {
+      "source": "nmnmcc/skills",
+      "sourceType": "github",
+      "skillPath": "skills/point/SKILL.md",
+      "computedHash": "bcc0db4cea1b6a707a758eaacd0e4caf9a25d199e2dbce8797a5735472b58645"
+    },
+    "simplicity": {
+      "source": "nmnmcc/skills",
+      "sourceType": "github",
+      "skillPath": "skills/simplicity/SKILL.md",
+      "computedHash": "231bb7f22a8bb269eaf0b8101ec68256b4a74b251afd89d9cd994cb2040c189e"
+    },
+    "study": {
+      "source": "nmnmcc/skills",
+      "sourceType": "github",
+      "skillPath": "skills/study/SKILL.md",
+      "computedHash": "bd75f8f8b32c9ea830abc5b439319655829974485c51e6a48796e039e1374f89"
+    },
+    "testing": {
+      "source": "nmnmcc/skills",
+      "sourceType": "github",
+      "skillPath": "skills/testing/SKILL.md",
+      "computedHash": "4be603026ce90bf00a2ee11697331f875ddbf47c875e73f41763fe4ba2545ef2"
+    },
+    "typesafe": {
+      "source": "nmnmcc/skills",
+      "sourceType": "github",
+      "skillPath": "skills/typesafe/SKILL.md",
+      "computedHash": "9f531ff58c061d16dbfa061de9130979edbb04ef4a6723bfc21502e7d1b0a2a0"
+    },
+    "ux": {
+      "source": "nmnmcc/skills",
+      "sourceType": "github",
+      "skillPath": "skills/ux/SKILL.md",
+      "computedHash": "089b2827a574e1ddfbcb99a4f1590ef05b5368ff99336bd85809e7be94352917"
     }
   }
 }

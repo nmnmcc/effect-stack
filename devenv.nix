@@ -4,24 +4,20 @@
   ...
 }:
 
-with pkgs;
-
 {
-  packages = [
+  packages = with pkgs; [
     git
+    nixd
     fish
     go-task
-    inputs.hashicorp.packages.${pkgs.system}.nomad
-    inputs.hashicorp.packages.${pkgs.system}.nomad-pack
-    openssl
   ];
 
   languages.javascript = {
     enable = true;
-    package = nodejs-slim_24;
+    package = pkgs.nodejs-slim_24;
     yarn = {
       enable = true;
-      package = yarn-berry_4;
+      package = pkgs.yarn-berry_4;
     };
   };
 }
