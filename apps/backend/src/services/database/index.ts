@@ -6,7 +6,7 @@ import { Pool } from "pg";
 
 import { Config } from "../config";
 import { relations } from "./relations";
-import type * as schema from "./schema/all";
+import type * as schema from "./schema";
 
 export type Schema = typeof schema;
 export type Relations = typeof relations;

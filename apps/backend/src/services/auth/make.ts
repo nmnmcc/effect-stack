@@ -4,7 +4,7 @@ import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { drizzle } from "drizzle-orm/node-postgres";
 import type { Pool } from "pg";
 
-import * as schema from "../database/schema/all";
+import * as schema from "../database/schema";
 
 export interface AuthConfig {
   readonly baseURL: string;
