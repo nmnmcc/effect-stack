@@ -3,6 +3,9 @@ node_modules
 .pnp.*
 .devenv*
 .direnv
-.next
+.pulumi
+.expo
+.react-router
+coverage
+build
 dist
-next-env.d.ts

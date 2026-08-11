@@ -9,7 +9,10 @@ export class Auth extends Context.Service<Auth>()("@effect-stack/services/auth/A
   make: Effect.gen(function* () {
     const pool = yield* DatabasePool;
     const config = yield* Config;
-    const auth = make(pool, config.server.baseURL);
+    const auth = make(pool, {
+      baseURL: config.server.baseURL,
+      trustedOrigins: config.server.trustedOrigins,
+    });
 
     type API = {
       [K in keyof typeof auth.api]: (typeof auth.api)[K] extends (...args: infer A) => PromiseLike<infer R>

@@ -30,8 +30,9 @@
 
 ## Frontend (`apps/frontend/`)
 
-- `components/ui/` are **generated files** from `@shark` registry — do not edit manually.
-- Prefer **server components**; only use `"use client"` when browser APIs or state are needed.
-- Pages using `nuqs` must split into server `page.tsx` + client `content.tsx` with `SectionBoundary` wrapping.
-- Pages using `useAtomSet`/`useAtomValue` must use `ClientOnly` to prevent SSR errors.
-- URL search params use **nuqs** (`useQueryState`/`useQueryStates`).
+- The frontend is an **Expo Router client application** for iOS, Android, and static web. It has no SSR, React Server Components, or server route modules.
+- Register routes under `src/app/` using Expo Router file-based routing and React Native primitives or `@expo/ui` components.
+- Keep API and authentication adapters platform-specific with `.native.ts` and `.web.ts` files when cookies or storage differ.
+- Build `AtomHttpApi` queries with stable `Atom.family` values. Do not add server-value initialization to client-only atoms.
+- All user-visible strings belong in `src/lib/localization.ts`; English and Simplified Chinese must remain complete and type-safe.
+- Native builds read the backend origin from `EXPO_PUBLIC_API_URL`. Web development may use its current origin, while the production Nginx image proxies same-origin `/api` requests to `BACKEND_URL`.

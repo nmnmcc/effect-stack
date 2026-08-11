@@ -2,21 +2,33 @@ version: "3"
 
 tasks:
   dev:
-    desc: Start Next.js dev server with Turbopack
-    cmd: yarn next dev --turbopack
+    desc: Start Expo development server
+    cmd: yarn dev
 
   build:
-    desc: Build Next.js for production
-    cmd: yarn next build
+    desc: Export Expo bundles for all platforms
+    cmd: yarn build
+
+  build:web:
+    desc: Export the static Expo web app
+    cmd: yarn build:web
 
   build:docker:
     desc: Build docker image
     cmd: docker build -f ../../Dockerfile.frontend -t effect-stack/frontend ../..
 
   start:
-    desc: Start Next.js production server
-    cmd: yarn next start
+    desc: Serve the exported Expo web app
+    cmd: yarn start:web
 
   lint:
     desc: Run ESLint
-    cmd: yarn eslint src/
+    cmd: yarn lint
+
+  typecheck:
+    desc: Type check the Expo frontend
+    cmd: yarn typecheck
+
+  test:
+    desc: Run frontend tests
+    cmd: yarn test

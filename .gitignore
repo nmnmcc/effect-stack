@@ -14,9 +14,15 @@ devenv.local.yaml
 
 .direnv
 .pre-commit-config.yaml
-.next
+.expo
+.react-router
+coverage
+build
 dist
 *.tsbuildinfo
 /.dev
+/.pulumi
 .playwright*
 *.local.*
+.env*.local
+/.env.production

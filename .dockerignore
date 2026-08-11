@@ -1,7 +1,12 @@
 .git
-.next
+.expo
+.react-router
+coverage
+build
+dist
 .devenv*
 .direnv
 .dev
+.pulumi
 node_modules
 *.tsbuildinfo

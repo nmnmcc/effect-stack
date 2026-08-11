@@ -52,10 +52,12 @@ export namespace DatabasePool {
         const client = await pool.connect();
         client.release();
       }).pipe(
-        Effect.retry(Schedule.exponential("1 second").pipe(
-          Schedule.modifyDelay((_, delay) => Effect.succeed(Duration.min(delay, Duration.seconds(10)))),
-          Schedule.take(10),
-        )),
+        Effect.retry(
+          Schedule.exponential("1 second").pipe(
+            Schedule.modifyDelay((_, delay) => Effect.succeed(Duration.min(delay, Duration.seconds(10)))),
+            Schedule.take(10),
+          ),
+        ),
         Effect.tap(() => Effect.log("Database: connected to PostgreSQL")),
       );
 

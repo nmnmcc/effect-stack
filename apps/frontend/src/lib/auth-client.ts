@@ -1,5 +1,1 @@
-import { createAuthClient } from "better-auth/react";
-
-export const authClient = createAuthClient({
-  basePath: "/api/auth",
-});
+export * from "./auth-client.web";
