@@ -73,7 +73,11 @@ services:
     environment:
       BACKEND_URL: http://backend:30000
     healthcheck:
-      test: [CMD, wget, -q, --spider, http://127.0.0.1:3000/]
+      test:
+        - CMD
+        - node
+        - -e
+        - "fetch('http://127.0.0.1:3000/').then(response => process.exit(response.ok ? 0 : 1)).catch(() => process.exit(1))"
       interval: 5s
       timeout: 3s
       retries: 12

@@ -7,7 +7,7 @@ export class Config extends Context.Service<Config>()("@effect-stack/backend/ser
       host: C.string("HOST").pipe(C.withDefault("0.0.0.0")),
       baseURL: C.string("BETTER_AUTH_URL").pipe(C.withDefault("http://localhost:30000")),
       corsOrigins: C.string("CORS_ORIGINS").pipe(
-        C.withDefault("http://localhost:3000,http://localhost:8081"),
+        C.withDefault("http://localhost:5173"),
         C.map((origins) =>
           origins
             .split(",")
@@ -16,7 +16,7 @@ export class Config extends Context.Service<Config>()("@effect-stack/backend/ser
         ),
       ),
       trustedOrigins: C.string("BETTER_AUTH_TRUSTED_ORIGINS").pipe(
-        C.withDefault("effect-stack://,http://localhost:8081,exp://,exp://**"),
+        C.withDefault("http://localhost:5173"),
         C.map((origins) =>
           origins
             .split(",")

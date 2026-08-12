@@ -1,15 +1,16 @@
 {
-  "extends": ["expo/tsconfig.base", "../../tsconfig.base.json"],
+  "extends": "../../tsconfig.base.json",
   "compilerOptions": {
     "declaration": false,
     "declarationMap": false,
     "incremental": true,
     "lib": ["dom", "dom.iterable", "esnext"],
     "noEmit": true,
-    "types": ["jest"],
+    "rootDirs": [".", "./.react-router/types"],
+    "types": ["node", "vite/client", "vitest/globals"],
     "paths": {
       "@/*": ["./src/*"]
     }
   },
-  "include": ["src/**/*.ts", "src/**/*.tsx", ".expo/types/**/*.ts", "expo-env.d.ts"]
+  "include": ["src/**/*.ts", "src/**/*.tsx", ".react-router/types/**/*.ts", "*.ts", "scripts/**/*.ts"]
 }

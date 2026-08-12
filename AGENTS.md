@@ -30,9 +30,9 @@
 
 ## Frontend (`apps/frontend/`)
 
-- The frontend is an **Expo Router client application** for iOS, Android, and static web. It has no SSR, React Server Components, or server route modules.
-- Register routes under `src/app/` using Expo Router file-based routing and React Native primitives or `@expo/ui` components.
-- Keep API and authentication adapters platform-specific with `.native.ts` and `.web.ts` files when cookies or storage differ.
-- Build `AtomHttpApi` queries with stable `Atom.family` values. Do not add server-value initialization to client-only atoms.
+- The frontend is a **Vite-powered React Router Framework application in SSR mode**. Routes live in `src/routes/` and are declared in `src/routes.ts`.
+- Use shadcn/ui components and Tailwind utilities for UI. Do not add handwritten component CSS.
+- Generate the TanStack Query client with Orval from the OpenAPI document exported by `@effect-stack/api`; do not use Effect Atom in the frontend.
+- Browser API and authentication requests use same-origin `/api`; the React Router server proxies them to `BACKEND_URL` and forwards cookies.
 - All user-visible strings belong in `src/lib/localization.ts`; English and Simplified Chinese must remain complete and type-safe.
-- Native builds read the backend origin from `EXPO_PUBLIC_API_URL`. Web development may use its current origin, while the production Nginx image proxies same-origin `/api` requests to `BACKEND_URL`.
+- SSR queries connect directly to `BACKEND_URL` and must forward the incoming request cookie when authentication affects the result.

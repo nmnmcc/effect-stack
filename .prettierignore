@@ -4,7 +4,7 @@ node_modules
 .devenv*
 .direnv
 .pulumi
-.expo
+.openapi
 .react-router
 coverage
 build

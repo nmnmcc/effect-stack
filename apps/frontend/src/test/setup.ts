@@ -1,1 +1,1 @@
-jest.mock("@expo/ui", () => jest.requireActual("./expo-ui.mock"));
+import "@testing-library/jest-dom/vitest";

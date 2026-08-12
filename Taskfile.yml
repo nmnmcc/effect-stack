@@ -46,7 +46,7 @@ tasks:
     cmd: task --list-all
 
   dev:
-    desc: Provision dependencies and start backend and Expo with hot reload
+    desc: Provision dependencies and start backend and React Router with hot reload
     cmds:
       - task: infra:up
 

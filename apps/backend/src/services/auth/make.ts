@@ -1,9 +1,9 @@
-import { expo } from "@better-auth/expo";
+import { drizzleAdapter } from "@better-auth/drizzle-adapter/relations-v2";
 import { betterAuth } from "better-auth";
-import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { drizzle } from "drizzle-orm/node-postgres";
 import type { Pool } from "pg";
 
+import { relations } from "../database/relations";
 import * as schema from "../database/schema";
 
 export interface AuthConfig {
@@ -15,8 +15,7 @@ export const make = (pool: Pool, config: AuthConfig) =>
   betterAuth({
     baseURL: config.baseURL,
     trustedOrigins: config.trustedOrigins,
-    plugins: [expo()],
-    database: drizzleAdapter(drizzle({ client: pool }), {
+    database: drizzleAdapter(drizzle({ client: pool, relations }), {
       provider: "pg",
       camelCase: false,
       usePlural: true,

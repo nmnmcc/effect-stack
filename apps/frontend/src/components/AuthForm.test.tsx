@@ -1,41 +1,36 @@
-import { fireEvent, render, waitFor } from "@testing-library/react-native";
+import { LocalizationProvider } from "@/lib/localization";
+import { fireEvent, render, screen } from "@testing-library/react";
+import { MemoryRouter } from "react-router";
 
 import { AuthForm } from "./AuthForm";
 
-const mockRouter = { replace: jest.fn() };
-const mockLocaleState = {
-  current: [{ languageCode: "en", languageTag: "en-US", regionCode: "US" }],
-};
-
-jest.mock("expo-router", () => ({ useRouter: () => mockRouter }));
-jest.mock("expo-localization", () => ({ useLocales: () => mockLocaleState.current }));
-
 describe("AuthForm", () => {
-  beforeEach(() => {
-    mockRouter.replace.mockClear();
-    mockLocaleState.current = [{ languageCode: "en", languageTag: "en-US", regionCode: "US" }];
-  });
-
-  it("submits valid English sign-in values and returns home", async () => {
-    const onSubmit = jest.fn(() => Promise.resolve(undefined));
-    const screen = await render(<AuthForm isRegistration={false} onSubmit={onSubmit} />);
-
-    await fireEvent.changeText(screen.getByPlaceholderText("Email"), "person@example.com");
-    await fireEvent.changeText(screen.getByPlaceholderText("Password"), "password123");
-    await fireEvent.press(screen.getByRole("button", { name: "Sign in" }));
-
-    await waitFor(() =>
-      expect(onSubmit).toHaveBeenCalledWith({ email: "person@example.com", name: "", password: "password123" }),
+  it("shows the validation error before sending an invalid registration", () => {
+    render(
+      <MemoryRouter>
+        <LocalizationProvider locale="en">
+          <AuthForm mode="sign-up" />
+        </LocalizationProvider>
+      </MemoryRouter>,
     );
-    expect(mockRouter.replace).toHaveBeenCalledWith("/");
+
+    fireEvent.change(screen.getByLabelText("Email"), { target: { value: "person@example.com" } });
+    fireEvent.change(screen.getByLabelText("Password"), { target: { value: "password123" } });
+    fireEvent.click(screen.getByRole("button", { name: "Create account" }));
+
+    expect(screen.getByRole("alert")).toHaveTextContent("Enter your name.");
   });
 
-  it("renders the registration form in Simplified Chinese", async () => {
-    mockLocaleState.current = [{ languageCode: "zh", languageTag: "zh-Hans-CN", regionCode: "CN" }];
-    const screen = await render(<AuthForm isRegistration onSubmit={() => Promise.resolve(undefined)} />);
+  it("renders the sign-in form in Simplified Chinese", () => {
+    render(
+      <MemoryRouter>
+        <LocalizationProvider locale="zh-Hans">
+          <AuthForm mode="sign-in" />
+        </LocalizationProvider>
+      </MemoryRouter>,
+    );
 
-    expect(screen.getByPlaceholderText("姓名")).toBeOnTheScreen();
-    expect(screen.getByPlaceholderText("邮箱")).toBeOnTheScreen();
-    expect(screen.getByRole("button", { name: "创建账户" })).toBeOnTheScreen();
+    expect(screen.getByLabelText("邮箱")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "登录" })).toBeInTheDocument();
   });
 });

@@ -1,65 +1,74 @@
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
+import type { TodoEncoded } from "@/generated/models";
 import { useTranslation } from "@/lib/localization";
-import { useAppColors } from "@/lib/theme";
-import { Button, Checkbox, List, ListItem, Text } from "@expo/ui";
-
-export interface TodoItem {
-  readonly id: string;
-  readonly isCompleted: boolean;
-  readonly title: string;
-  readonly userId: string;
-}
 
 export interface TodoItemsProps {
+  readonly isTodoPending: (id: string) => boolean;
   readonly onDelete: (id: string) => void;
-  readonly onToggle: (todo: TodoItem) => void;
-  readonly pendingTodoIds: ReadonlySet<string>;
+  readonly onToggle: (todo: TodoEncoded) => void;
   readonly sessionUserId: string | undefined;
-  readonly todos: readonly TodoItem[];
+  readonly todos: readonly TodoEncoded[];
 }
 
-export function TodoItems({ onDelete, onToggle, pendingTodoIds, sessionUserId, todos }: TodoItemsProps) {
+export function TodoItems({ isTodoPending, onDelete, onToggle, sessionUserId, todos }: TodoItemsProps) {
   const { t } = useTranslation();
-  const colors = useAppColors();
+
+  if (todos.length === 0) return <p className="text-muted-foreground border-t pt-5 text-sm">{t("todo.empty")}</p>;
 
   return (
-    <List>
-      {todos.length === 0 ? <ListItem>{t("todo.empty")}</ListItem> : null}
+    <ul className="divide-y">
       {todos.map((todo) => {
         const isOwner = sessionUserId === todo.userId;
-        const isPending = pendingTodoIds.has(todo.id);
-        const supportingText = isOwner ? (todo.isCompleted ? t("todo.completed") : undefined) : t("todo.readOnly");
+        const isPending = isTodoPending(todo.id);
 
         return (
-          <ListItem
-            key={todo.id}
-            leading={
-              isOwner ? (
-                <Checkbox
-                  disabled={isPending}
-                  label={`${t("todo.toggle")} ${todo.title}`}
-                  onValueChange={() => onToggle(todo)}
-                  value={todo.isCompleted}
-                />
-              ) : undefined
-            }
-            supportingText={supportingText}
-            trailing={
-              isOwner ? (
-                <Button
-                  disabled={isPending}
-                  label={t("todo.delete")}
-                  onPress={() => onDelete(todo.id)}
-                  variant="text"
-                />
-              ) : undefined
-            }
-          >
-            <Text numberOfLines={2} textStyle={{ color: colors.text, fontSize: 16 }}>
-              {todo.title}
-            </Text>
-          </ListItem>
+          <li className="grid min-h-16 grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-3 py-3" key={todo.id}>
+            {isOwner ? (
+              <Checkbox
+                aria-label={`${t("todo.toggle")} ${todo.title}`}
+                checked={todo.isCompleted}
+                disabled={isPending}
+                onCheckedChange={() => onToggle(todo)}
+              />
+            ) : (
+              <span aria-hidden="true" className="bg-border m-1 size-2 rounded-full" />
+            )}
+            <div className="grid min-w-0 gap-1">
+              <span
+                className={
+                  todo.isCompleted
+                    ? "text-muted-foreground font-medium break-words line-through"
+                    : "font-medium break-words"
+                }
+              >
+                {todo.title}
+              </span>
+              {isOwner ? (
+                todo.isCompleted ? (
+                  <Badge className="w-fit" variant="secondary">
+                    {t("todo.completed")}
+                  </Badge>
+                ) : null
+              ) : (
+                <span className="text-muted-foreground text-xs">{t("todo.readOnly")}</span>
+              )}
+            </div>
+            {isOwner ? (
+              <Button
+                disabled={isPending}
+                onClick={() => onDelete(todo.id)}
+                size="sm"
+                type="button"
+                variant="destructive"
+              >
+                {t("todo.delete")}
+              </Button>
+            ) : null}
+          </li>
         );
       })}
-    </List>
+    </ul>
   );
 }

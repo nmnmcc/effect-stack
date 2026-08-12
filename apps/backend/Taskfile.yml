@@ -7,7 +7,7 @@ tasks:
 
   auth:gen:
     desc: Generate Better Auth schema
-    cmd: yarn better-auth generate -y --config src/services/auth/static.ts --output src/services/database/schema/auth.ts
+    cmd: yarn auth generate -y --config src/services/auth/static.ts --output src/services/database/schema/auth.ts
 
   database:generate:
     desc: Generate Drizzle migrations

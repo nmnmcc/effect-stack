@@ -2,31 +2,31 @@ version: "3"
 
 tasks:
   dev:
-    desc: Start Expo development server
+    desc: Start the Vite-powered React Router development server
     cmd: yarn dev
 
   build:
-    desc: Export Expo bundles for all platforms
+    desc: Generate the API client and build the React Router SSR application
     cmd: yarn build
 
-  build:web:
-    desc: Export the static Expo web app
-    cmd: yarn build:web
+  generate:
+    desc: Generate the TanStack Query client from the Effect OpenAPI document
+    cmd: yarn generate
 
   build:docker:
-    desc: Build docker image
+    desc: Build the frontend SSR image
     cmd: docker build -f ../../Dockerfile.frontend -t effect-stack/frontend ../..
 
   start:
-    desc: Serve the exported Expo web app
-    cmd: yarn start:web
+    desc: Start the built React Router server
+    cmd: yarn start
 
   lint:
     desc: Run ESLint
     cmd: yarn lint
 
   typecheck:
-    desc: Type check the Expo frontend
+    desc: Generate route types and type-check the frontend
     cmd: yarn typecheck
 
   test:

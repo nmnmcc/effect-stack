@@ -1,22 +1,23 @@
-import { useLocales, type Locale } from "expo-localization";
-import { I18n } from "i18n-js";
-import { useCallback } from "react";
+import { createContext, createElement, useContext, type ReactNode } from "react";
 
 const english = {
-  "app.back": "Back",
-  "app.configurationError": "Configuration needed",
-  "app.configurationInvalid": "EXPO_PUBLIC_API_URL must be an HTTP(S) origin without an /api path.",
-  "app.configurationMissing": "Set EXPO_PUBLIC_API_URL to the backend origin before opening the native app.",
+  "app.description": "A server-rendered todo application built with Effect and React Router.",
+  "app.errorDetails": "The application could not complete this request.",
+  "app.errorTitle": "Something went wrong",
   "app.goHome": "Go home",
   "app.loading": "Loading…",
   "app.notFound": "This page does not exist.",
+  "app.notFoundTitle": "Page not found",
   "app.retry": "Retry",
   "app.title": "effect-stack",
   "auth.createAccount": "Create account",
+  "auth.account": "Account",
   "auth.email": "Email",
   "auth.emailInvalid": "Enter a valid email address.",
+  "auth.hasAccount": "Already have an account?",
   "auth.name": "Name",
   "auth.nameRequired": "Enter your name.",
+  "auth.noAccount": "Need an account?",
   "auth.password": "Password",
   "auth.passwordTooShort": "Use at least 8 characters.",
   "auth.rejected": "Those details could not be accepted. Check them and try again.",
@@ -46,20 +47,23 @@ export type TranslationKey = keyof typeof english;
 export type SupportedLocale = "en" | "zh-Hans";
 
 const simplifiedChinese = {
-  "app.back": "返回",
-  "app.configurationError": "需要完成配置",
-  "app.configurationInvalid": "EXPO_PUBLIC_API_URL 必须是 HTTP(S) 源地址，且不能包含 /api 路径。",
-  "app.configurationMissing": "打开原生应用前，请将 EXPO_PUBLIC_API_URL 设置为后端源地址。",
+  "app.description": "使用 Effect 与 React Router 构建的服务端渲染待办应用。",
+  "app.errorDetails": "应用无法完成此请求。",
+  "app.errorTitle": "发生错误",
   "app.goHome": "返回首页",
   "app.loading": "正在加载…",
   "app.notFound": "此页面不存在。",
+  "app.notFoundTitle": "页面不存在",
   "app.retry": "重试",
   "app.title": "effect-stack",
   "auth.createAccount": "创建账户",
+  "auth.account": "账户",
   "auth.email": "邮箱",
   "auth.emailInvalid": "请输入有效的邮箱地址。",
+  "auth.hasAccount": "已有账户？",
   "auth.name": "姓名",
   "auth.nameRequired": "请输入姓名。",
+  "auth.noAccount": "还没有账户？",
   "auth.password": "密码",
   "auth.passwordTooShort": "密码至少需要 8 个字符。",
   "auth.rejected": "无法接受这些账户信息，请检查后重试。",
@@ -90,25 +94,19 @@ const translations = {
   "zh-Hans": simplifiedChinese,
 } satisfies Record<SupportedLocale, Record<TranslationKey, string>>;
 
-const i18n = new I18n(translations);
-i18n.defaultLocale = "en";
-i18n.defaultSeparator = "|";
-i18n.enableFallback = true;
-
 const simplifiedRegions = new Set(["CN", "MY", "SG"]);
 const traditionalRegions = new Set(["HK", "MO", "TW"]);
 
-type LocalePreference = Pick<Locale, "languageCode" | "languageTag" | "regionCode">;
+export const resolveSupportedLocale = (languageTags: readonly string[]): SupportedLocale => {
+  for (const rawLanguageTag of languageTags) {
+    const languageTag = rawLanguageTag.trim().toLowerCase();
+    if (languageTag.startsWith("en")) return "en";
+    if (!languageTag.startsWith("zh")) continue;
 
-export const resolveSupportedLocale = (locales: readonly LocalePreference[]): SupportedLocale => {
-  for (const locale of locales) {
-    if (locale.languageCode === "en") return "en";
-    if (locale.languageCode !== "zh") continue;
-
-    const languageTag = locale.languageTag.toLowerCase();
-    const isTraditional = languageTag.includes("-hant") || traditionalRegions.has(locale.regionCode ?? "");
-    const isSimplified =
-      languageTag.includes("-hans") || simplifiedRegions.has(locale.regionCode ?? "") || !isTraditional;
+    const parts = languageTag.split("-");
+    const region = parts.find((part) => part.length === 2)?.toUpperCase();
+    const isTraditional = languageTag.includes("-hant") || traditionalRegions.has(region ?? "");
+    const isSimplified = languageTag.includes("-hans") || simplifiedRegions.has(region ?? "") || !isTraditional;
 
     if (isSimplified) return "zh-Hans";
   }
@@ -116,14 +114,29 @@ export const resolveSupportedLocale = (locales: readonly LocalePreference[]): Su
   return "en";
 };
 
-export const translate = (locale: SupportedLocale, key: TranslationKey) => {
-  i18n.locale = locale;
-  return i18n.t(key);
-};
+export const localeFromRequest = (request: Request) =>
+  resolveSupportedLocale(
+    (request.headers.get("accept-language") ?? "")
+      .split(",")
+      .map((entry) => entry.split(";", 1)[0] ?? "")
+      .filter((entry) => entry.length > 0),
+  );
+
+export const translate = (locale: SupportedLocale, key: TranslationKey) => translations[locale][key];
+
+const LocalizationContext = createContext<SupportedLocale>("en");
+
+export function LocalizationProvider({
+  children,
+  locale,
+}: {
+  readonly children: ReactNode;
+  readonly locale: SupportedLocale;
+}) {
+  return createElement(LocalizationContext, { value: locale }, children);
+}
 
 export const useTranslation = () => {
-  const locale = resolveSupportedLocale(useLocales());
-  const t = useCallback((key: TranslationKey) => translate(locale, key), [locale]);
-
-  return { locale, t };
+  const locale = useContext(LocalizationContext);
+  return { locale, t: (key: TranslationKey) => translate(locale, key) };
 };

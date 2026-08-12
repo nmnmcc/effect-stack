@@ -1,146 +1,145 @@
-import { Keys } from "@/atoms/keys";
-import { createTodoAtom, deleteTodoAtom, todosPageQuery, updateTodoAtom } from "@/atoms/todos";
-import { ScreenHost } from "@/components/ScreenHost";
-import { TodoItems, type TodoItem } from "@/components/TodoItems";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Skeleton } from "@/components/ui/skeleton";
+import type { TodoEncoded, TodosListParams } from "@/generated/models";
+import {
+  getTodosListQueryKey,
+  useTodosCreate,
+  useTodosDelete,
+  useTodosList,
+  useTodosUpdate,
+} from "@/generated/todos/todos";
 import { authClient } from "@/lib/auth-client";
 import { useTranslation } from "@/lib/localization";
-import { useAppColors } from "@/lib/theme";
-import { useAtomRefresh, useAtomSet, useAtomValue } from "@effect/atom-react";
-import { Button, Column, Text, TextInput, type TextInputRef } from "@expo/ui";
-import { Exit } from "effect";
-import * as AsyncResult from "effect/unstable/reactivity/AsyncResult";
-import { useCallback, useRef, useState } from "react";
+import { useQueryClient } from "@tanstack/react-query";
+import { useState, type FormEvent } from "react";
+
+import { TodoItems } from "./TodoItems";
+
+export const todoListParams = { limit: "25", offset: "0" } satisfies TodosListParams;
 
 export function TodoScreen() {
+  const queryClient = useQueryClient();
   const { data: session } = authClient.useSession();
-  const todosAtom = todosPageQuery(0);
-  const result = useAtomValue(todosAtom);
-  const refreshTodos = useAtomRefresh(todosAtom);
-  const createTodo = useAtomSet(createTodoAtom, { mode: "promiseExit" });
-  const updateTodo = useAtomSet(updateTodoAtom, { mode: "promiseExit" });
-  const deleteTodo = useAtomSet(deleteTodoAtom, { mode: "promiseExit" });
-  const titleInputRef = useRef<TextInputRef>(null);
   const { t } = useTranslation();
-  const colors = useAppColors();
   const [title, setTitle] = useState("");
-  const [isCreating, setIsCreating] = useState(false);
-  const [pendingTodoIds, setPendingTodoIds] = useState<ReadonlySet<string>>(() => new Set());
-  const [actionError, setActionError] = useState<"create" | "mutation" | undefined>();
+  const todosQuery = useTodosList(todoListParams);
+  const invalidateTodos = () => queryClient.invalidateQueries({ queryKey: getTodosListQueryKey() });
+  const createTodo = useTodosCreate({ mutation: { onSuccess: invalidateTodos } });
+  const updateTodo = useTodosUpdate({ mutation: { onSuccess: invalidateTodos } });
+  const deleteTodo = useTodosDelete({ mutation: { onSuccess: invalidateTodos } });
 
-  const handleCreate = useCallback(async () => {
+  const handleCreate = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
     const trimmedTitle = title.trim();
-    if (trimmedTitle.length === 0 || isCreating) return;
+    if (trimmedTitle.length === 0 || createTodo.isPending) return;
 
-    setActionError(undefined);
-    setIsCreating(true);
-    const exit = await createTodo({
-      payload: { title: trimmedTitle },
-      reactivityKeys: [Keys.todos],
-    });
-    setIsCreating(false);
+    createTodo.mutate(
+      { data: { title: trimmedTitle } },
+      {
+        onSuccess: () => setTitle(""),
+      },
+    );
+  };
 
-    if (Exit.isFailure(exit)) {
-      setActionError("create");
-      return;
-    }
+  const handleToggle = (todo: TodoEncoded) => {
+    updateTodo.mutate({ id: todo.id, data: { isCompleted: !todo.isCompleted } });
+  };
 
-    setTitle("");
-    titleInputRef.current?.clear();
-  }, [createTodo, isCreating, title]);
+  const handleDelete = (id: string) => {
+    deleteTodo.mutate({ id });
+  };
 
-  const runTodoMutation = useCallback(async (id: string, mutation: () => Promise<Exit.Exit<unknown, unknown>>) => {
-    setActionError(undefined);
-    setPendingTodoIds((current) => new Set([...current, id]));
-    const exit = await mutation();
-    setPendingTodoIds((current) => new Set([...current].filter((currentId) => currentId !== id)));
-    if (Exit.isFailure(exit)) setActionError("mutation");
-  }, []);
+  const isTodoPending = (id: string) =>
+    (updateTodo.isPending && updateTodo.variables.id === id) ||
+    (deleteTodo.isPending && deleteTodo.variables.id === id);
 
-  const handleToggle = useCallback(
-    (todo: TodoItem) =>
-      runTodoMutation(todo.id, () =>
-        updateTodo({
-          params: { id: todo.id },
-          payload: { isCompleted: !todo.isCompleted },
-          reactivityKeys: [Keys.todos, Keys.todo(todo.id)],
-        }),
-      ),
-    [runTodoMutation, updateTodo],
-  );
-
-  const handleDelete = useCallback(
-    (id: string) =>
-      runTodoMutation(id, () =>
-        deleteTodo({
-          params: { id },
-          reactivityKeys: [Keys.todos, Keys.todo(id)],
-        }),
-      ),
-    [deleteTodo, runTodoMutation],
-  );
+  const hasMutationError = updateTodo.isError || deleteTodo.isError;
 
   return (
-    <ScreenHost>
-      <Column spacing={16} style={{ padding: 20 }}>
-        <Text textStyle={{ color: colors.text, fontSize: 30, fontWeight: "700" }}>{t("todo.title")}</Text>
+    <Card className="shadow-xl shadow-black/5">
+      <CardHeader className="flex-row items-end justify-between gap-4">
+        <div>
+          <p className="text-primary mb-2 text-xs font-semibold tracking-widest uppercase">{t("app.title")}</p>
+          <CardTitle>
+            <h1 className="text-4xl font-semibold tracking-tight sm:text-5xl">{t("todo.title")}</h1>
+          </CardTitle>
+        </div>
+        {todosQuery.isFetching && !todosQuery.isPending ? (
+          <Badge variant="secondary">{t("todo.refreshing")}</Badge>
+        ) : null}
+      </CardHeader>
 
+      <CardContent className="space-y-4">
         {session ? (
-          <Column spacing={10}>
-            <TextInput
-              editable={!isCreating}
+          <form className="flex flex-col gap-2 sm:flex-row" onSubmit={handleCreate}>
+            <Label className="sr-only" htmlFor="new-todo">
+              {t("todo.newPlaceholder")}
+            </Label>
+            <Input
+              className="h-9"
+              disabled={createTodo.isPending}
+              id="new-todo"
               maxLength={200}
-              onChangeText={setTitle}
-              onSubmitEditing={handleCreate}
+              onChange={(event) => setTitle(event.currentTarget.value)}
               placeholder={t("todo.newPlaceholder")}
-              ref={titleInputRef}
-              returnKeyType="done"
-              style={{
-                backgroundColor: colors.surface,
-                borderColor: colors.border,
-                borderRadius: 12,
-                borderWidth: 1,
-                padding: 14,
-                width: "100%",
-              }}
+              value={title}
             />
-            <Button disabled={isCreating || title.trim().length === 0} label={t("todo.add")} onPress={handleCreate} />
-          </Column>
+            <Button
+              className="sm:shrink-0"
+              disabled={createTodo.isPending || title.trim().length === 0}
+              size="lg"
+              type="submit"
+            >
+              {t("todo.add")}
+            </Button>
+          </form>
         ) : (
-          <Text textStyle={{ color: colors.muted, fontSize: 14, lineHeight: 20 }}>{t("todo.manageHint")}</Text>
+          <p className="bg-muted text-muted-foreground rounded-lg px-3 py-2.5 text-sm">{t("todo.manageHint")}</p>
         )}
 
-        {actionError === undefined ? null : (
-          <Text textStyle={{ color: colors.danger, fontSize: 14, lineHeight: 20 }}>
-            {t(actionError === "create" ? "todo.createFailed" : "todo.mutationFailed")}
-          </Text>
+        {createTodo.isError ? (
+          <Alert variant="destructive">
+            <AlertDescription>{t("todo.createFailed")}</AlertDescription>
+          </Alert>
+        ) : null}
+        {hasMutationError ? (
+          <Alert variant="destructive">
+            <AlertDescription>{t("todo.mutationFailed")}</AlertDescription>
+          </Alert>
+        ) : null}
+
+        {todosQuery.isPending ? (
+          <div aria-label={t("app.loading")} className="grid gap-3 border-t pt-5">
+            <Skeleton className="h-10 w-full" />
+            <Skeleton className="h-10 w-full" />
+            <Skeleton className="h-10 w-4/5" />
+          </div>
+        ) : null}
+        {todosQuery.isError ? (
+          <Alert variant="destructive">
+            <AlertDescription className="flex items-center justify-between gap-3">
+              <span>{t("todo.loadFailed")}</span>
+              <Button onClick={() => todosQuery.refetch()} size="sm" type="button" variant="outline">
+                {t("app.retry")}
+              </Button>
+            </AlertDescription>
+          </Alert>
+        ) : null}
+        {todosQuery.data === undefined ? null : (
+          <TodoItems
+            isTodoPending={isTodoPending}
+            onDelete={handleDelete}
+            onToggle={handleToggle}
+            sessionUserId={session?.user.id}
+            todos={todosQuery.data}
+          />
         )}
-
-        {AsyncResult.isInitial(result) ? (
-          <Text textStyle={{ color: colors.muted, fontSize: 15 }}>{t("app.loading")}</Text>
-        ) : null}
-
-        {AsyncResult.isFailure(result) ? (
-          <Column spacing={10}>
-            <Text textStyle={{ color: colors.danger, fontSize: 15 }}>{t("todo.loadFailed")}</Text>
-            <Button label={t("app.retry")} onPress={refreshTodos} variant="outlined" />
-          </Column>
-        ) : null}
-
-        {AsyncResult.isSuccess(result) ? (
-          <Column spacing={8}>
-            {result.waiting ? (
-              <Text textStyle={{ color: colors.muted, fontSize: 13 }}>{t("todo.refreshing")}</Text>
-            ) : null}
-            <TodoItems
-              onDelete={handleDelete}
-              onToggle={handleToggle}
-              pendingTodoIds={pendingTodoIds}
-              sessionUserId={session?.user.id}
-              todos={result.value}
-            />
-          </Column>
-        ) : null}
-      </Column>
-    </ScreenHost>
+      </CardContent>
+    </Card>
   );
 }
