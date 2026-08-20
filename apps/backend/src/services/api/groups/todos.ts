@@ -1,4 +1,4 @@
-import { Api, CurrentUser, TodoForbidden, TodoNotFound } from "@effect-stack/api";
+import { Api, CurrentUser, Todo, TodoForbidden, TodoNotFound } from "@effect-stack/api";
 import { eq } from "drizzle-orm";
 import { Effect } from "effect";
 import { HttpApiBuilder, HttpApiError } from "effect/unstable/httpapi";
@@ -20,8 +20,8 @@ export const TodosHandlers = HttpApiBuilder.group(
             offset: query.offset ?? 0,
             orderBy: (table, { desc }) => [desc(table.createdAt)],
           });
-          return rows;
-        }).pipe(Effect.catchTag("EffectDrizzleQueryError", () => Effect.fail(new HttpApiError.InternalServerError()))),
+          return rows.map((row) => new Todo(row));
+        }).pipe(Effect.catchTag("EffectDrizzleQueryError", () => new HttpApiError.InternalServerError())),
       )
       .handle("getById", ({ params }) =>
         Effect.gen(function* () {
@@ -29,8 +29,8 @@ export const TodosHandlers = HttpApiBuilder.group(
             where: { id: params.id },
           });
           if (row === undefined) return yield* new TodoNotFound();
-          return row;
-        }).pipe(Effect.catchTag("EffectDrizzleQueryError", () => Effect.fail(new HttpApiError.InternalServerError()))),
+          return new Todo(row);
+        }).pipe(Effect.catchTag("EffectDrizzleQueryError", () => new HttpApiError.InternalServerError())),
       )
       .handle("create", ({ payload }) =>
         Effect.gen(function* () {
@@ -42,8 +42,9 @@ export const TodosHandlers = HttpApiBuilder.group(
               userId: user.id,
             })
             .returning();
-          return row!;
-        }).pipe(Effect.catchTag("EffectDrizzleQueryError", () => Effect.fail(new HttpApiError.InternalServerError()))),
+          if (row === undefined) return yield* new HttpApiError.InternalServerError();
+          return new Todo(row);
+        }).pipe(Effect.catchTag("EffectDrizzleQueryError", () => new HttpApiError.InternalServerError())),
       )
       .handle("update", ({ params, payload }) =>
         Effect.gen(function* () {
@@ -54,13 +55,17 @@ export const TodosHandlers = HttpApiBuilder.group(
           if (existing === undefined) return yield* new TodoNotFound();
           if (existing.userId !== user.id) return yield* new TodoForbidden();
 
-          const updates: Record<string, unknown> = {};
-          if (payload.title !== undefined) updates["title"] = payload.title;
-          if (payload.isCompleted !== undefined) updates["isCompleted"] = payload.isCompleted;
-
-          const [row] = yield* database.update(todos).set(updates).where(eq(todos.id, params.id)).returning();
-          return row!;
-        }).pipe(Effect.catchTag("EffectDrizzleQueryError", () => Effect.fail(new HttpApiError.InternalServerError()))),
+          const [row] = yield* database
+            .update(todos)
+            .set({
+              title: payload.title ?? undefined,
+              isCompleted: payload.isCompleted ?? undefined,
+            })
+            .where(eq(todos.id, params.id))
+            .returning();
+          if (row === undefined) return yield* new HttpApiError.InternalServerError();
+          return new Todo(row);
+        }).pipe(Effect.catchTag("EffectDrizzleQueryError", () => new HttpApiError.InternalServerError())),
       )
       .handle("delete", ({ params }) =>
         Effect.gen(function* () {
@@ -72,7 +77,7 @@ export const TodosHandlers = HttpApiBuilder.group(
           if (existing.userId !== user.id) return yield* new TodoForbidden();
 
           yield* database.delete(todos).where(eq(todos.id, params.id));
-        }).pipe(Effect.catchTag("EffectDrizzleQueryError", () => Effect.fail(new HttpApiError.InternalServerError()))),
+        }).pipe(Effect.catchTag("EffectDrizzleQueryError", () => new HttpApiError.InternalServerError())),
       );
   }),
 );

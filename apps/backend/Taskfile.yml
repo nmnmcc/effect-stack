@@ -19,7 +19,7 @@ tasks:
 
   database:push:
     desc: Push schema changes to database
-    cmd: yarn drizzle-kit push
+    cmd: yarn drizzle-kit push --strict
 
   database:studio:
     desc: Open Drizzle Studio
