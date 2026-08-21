@@ -23,13 +23,19 @@
       "source": "nmnmcc/skills",
       "sourceType": "github",
       "skillPath": "skills/just-do-it/SKILL.md",
-      "computedHash": "fd048f76a7d61388cf2b39bd598112426ef16f3b7dcb3b4aaa7a19d3a42cbfd7"
+      "computedHash": "86c8a3afa60fd1d832881fb8c8c50e7ae98bcc4376f3c10042cffd3c258f88a5"
     },
     "line": {
       "source": "nmnmcc/skills",
       "sourceType": "github",
       "skillPath": "skills/line/SKILL.md",
       "computedHash": "32188eec8d9c45c608d80df1c25a0238ee0e5c81dccbf84ddc7b914b4fbe6aa2"
+    },
+    "nobody-cares-how": {
+      "source": "nmnmcc/skills",
+      "sourceType": "github",
+      "skillPath": "skills/nobody-cares-how/SKILL.md",
+      "computedHash": "82a3ee044208a06304b6c2d1bcfe8e828e5d8e497d32d14fe9edba255f50f2cf"
     },
     "pattern": {
       "source": "nmnmcc/skills",
@@ -65,7 +71,7 @@
       "source": "nmnmcc/skills",
       "sourceType": "github",
       "skillPath": "skills/testing/SKILL.md",
-      "computedHash": "4be603026ce90bf00a2ee11697331f875ddbf47c875e73f41763fe4ba2545ef2"
+      "computedHash": "7be345a5c00365bf6258b56b9e1a1d6c1506e686eb82f1da95e013b8bcde46de"
     },
     "typesafe": {
       "source": "nmnmcc/skills",
